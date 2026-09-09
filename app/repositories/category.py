@@ -1,7 +1,7 @@
 from app.schemas.category import CreateCategoryRequest, GetCategory
 
 
-def is_category_exists(name: str | None = None, id: int = 0) -> bool:
+def is_category_exists(name: str | None = None, id: int | None = None) -> bool:
     """
     Проверяет, существует ли категория с заданным именем или идентификатором.
     :param name: Имя категории для проверки.

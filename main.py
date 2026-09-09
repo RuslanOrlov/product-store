@@ -15,6 +15,9 @@
 # Закомментировать несколько строк  - Ctrl + K, затем Ctrl + C
 # Раскомментировать несколько строк - Ctrl + K, затем Ctrl + U
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
+from app.api.v1.category import router as category_router
 
 app = FastAPI()
+
+app.include_router(category_router, prefix="/api/v1", tags=["Category"])
