@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -24,6 +26,7 @@ class GetCategory(BaseModel):
     id: int | None = None
     name: str = Field(..., max_length=100)
     description: str | None = Field(None, max_length=255)
+    created_at: datetime
 
     # Валидатор для проверки корректности поля name
     @field_validator("name")

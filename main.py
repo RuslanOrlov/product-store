@@ -16,8 +16,18 @@
 # Раскомментировать несколько строк - Ctrl + K, затем Ctrl + U
 
 from fastapi import FastAPI
+
 from app.api.v1.category import router as category_router
+from app.database import Base, engine
 
 app = FastAPI()
 
 app.include_router(category_router, prefix="/api/v1", tags=["Category"])
+
+
+@app.get("/health")
+def check_health():
+    return {"Status": "200"}
+
+
+Base.metadata.create_all(bind=engine)
