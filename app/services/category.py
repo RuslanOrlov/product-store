@@ -2,17 +2,21 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.repositories import category as category_repository
-from app.schemas.category import CreateCategoryRequest, GetCategory
+from app.schemas.category import (
+    CreateOrUpdateCategoryRequest,
+    GetCategory,
+    UpdateCategoryRequest,
+)
 
 # from app.repositories import product as product_repository
 
 
-def get_all_categories(db: Session) -> list[GetCategory]:
+def get_all_categories(db: Session, text: str | None = None) -> list[GetCategory]:
     # Вернуть все категории
-    return category_repository.get_all_categories(db)
+    return category_repository.get_all_categories(db, text)
 
 
-def create_category(db: Session, dto: CreateCategoryRequest) -> GetCategory:
+def create_category(db: Session, dto: CreateOrUpdateCategoryRequest) -> GetCategory:
     # Проверить, есть ли категория с таким наименованием
     if category_repository.is_category_exists(db=db, name=dto.name):
         # Если категория уже есть, выбрасываем исключение
@@ -28,10 +32,17 @@ def create_category(db: Session, dto: CreateCategoryRequest) -> GetCategory:
     return category
 
 
-def update_category(db: Session, category: GetCategory) -> GetCategory:
+def update_category(db: Session, category: UpdateCategoryRequest) -> GetCategory:
+    # Проверить, есть ли категория с таким id
+    if not category_repository.is_category_exists(db=db, id=category.id):
+        # Если категория отсутствует, выбрасываем исключение
+        raise HTTPException(
+            status_code=409,
+            detail=f"Category with expected id '{category.id}' does not exist.",
+        )
     # Проверить, есть ли категория с таким названием
     if category_repository.is_category_exists(db=db, name=category.name):
-        # Если категория уже есть, выбрасываем исключение
+        # Если категория с таким названием уже есть, выбрасываем исключение
         raise HTTPException(
             status_code=409,
             detail=f"Category with given name '{category.name}' already exists.",
@@ -39,6 +50,32 @@ def update_category(db: Session, category: GetCategory) -> GetCategory:
 
     # Иначае обновить категорию
     updated = category_repository.update_category(db, category)
+    db.commit()
+
+    # Вернуть измененную категорию
+    return updated
+
+
+def update_category_by_id(
+    db: Session, id: int, category: CreateOrUpdateCategoryRequest
+) -> GetCategory:
+    # Проверить, есть ли категория с таким id
+    if not category_repository.is_category_exists(db=db, id=id):
+        # Если категория отсутствует, выбрасываем исключение
+        raise HTTPException(
+            status_code=409,
+            detail=f"Category with given id '{id}' does not exist.",
+        )
+    # Проверить, есть ли категория с таким названием
+    if category_repository.is_category_exists(db=db, name=category.name):
+        # Если категория с таким названием уже есть, выбрасываем исключение
+        raise HTTPException(
+            status_code=409,
+            detail=f"Category with given name '{category.name}' already exists.",
+        )
+
+    # Иначае обновить категорию
+    updated = category_repository.update_category_by_id(db, id, category)
     db.commit()
 
     # Вернуть измененную категорию
@@ -71,7 +108,7 @@ def delete_category(db: Session, id: int) -> dict[str, str]:
 
 
 def get_category_by_id(db: Session, id: int) -> GetCategory:
-    # Проверить, отсутствует ли категория с таким идентификатором
+    # Проверить, отсутствует ли категория с таким id
     if not category_repository.is_category_exists(db=db, id=id):
         # Если категории нет, выбрасываем исключение
         raise HTTPException(
