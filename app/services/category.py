@@ -7,6 +7,11 @@ from app.schemas.category import CreateCategoryRequest, GetCategory
 # from app.repositories import product as product_repository
 
 
+def get_all_categories(db: Session) -> list[GetCategory]:
+    # Вернуть все категории
+    return category_repository.get_all_categories(db)
+
+
 def create_category(db: Session, dto: CreateCategoryRequest) -> GetCategory:
     # Проверить, есть ли категория с таким наименованием
     if category_repository.is_category_exists(db=db, name=dto.name):
@@ -21,23 +26,6 @@ def create_category(db: Session, dto: CreateCategoryRequest) -> GetCategory:
 
     # Вернуть новую категорию
     return category
-
-
-def get_category_by_id(db: Session, id: int) -> GetCategory:
-    # Проверить, отсутствует ли категория с таким идентификатором
-    if not category_repository.is_category_exists(db=db, id=id):
-        # Если категории нет, выбрасываем исключение
-        raise HTTPException(
-            status_code=404, detail=f"Category with given id'{id}' does not exist."
-        )
-
-    # Иначе вернуть категорию
-    return category_repository.get_category_by_id(db, id)
-
-
-def get_all_categories(db: Session) -> list[GetCategory]:
-    # Вернуть все категории
-    return category_repository.get_all_categories(db)
 
 
 def update_category(db: Session, category: GetCategory) -> GetCategory:
@@ -80,3 +68,15 @@ def delete_category(db: Session, id: int) -> dict[str, str]:
     category_repository.delete_category(db, id)
     db.commit()
     return {"message": f"Category with given id '{id}' successfully deleted"}
+
+
+def get_category_by_id(db: Session, id: int) -> GetCategory:
+    # Проверить, отсутствует ли категория с таким идентификатором
+    if not category_repository.is_category_exists(db=db, id=id):
+        # Если категории нет, выбрасываем исключение
+        raise HTTPException(
+            status_code=404, detail=f"Category with given id'{id}' does not exist."
+        )
+
+    # Иначе вернуть категорию
+    return category_repository.get_category_by_id(db, id)
