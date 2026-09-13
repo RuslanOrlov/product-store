@@ -43,11 +43,11 @@ def get_category_by_name(db: Session, name: str) -> Category:
 
 
 def get_all_categories(db: Session, text: str | None = None) -> list[Category]:
-    # Получаем все категории
+    # Получаем все категории, если условие НЕ задано
     if text is None or len(text) == 0:
         return db.query(Category).all()
 
-    # Получаем категории по условию
+    # Получаем категории по условию, если оно задано
     search_value = f"%{text}%"
     results = (
         db.query(Category)
@@ -62,6 +62,26 @@ def get_all_categories(db: Session, text: str | None = None) -> list[Category]:
         .all()
     )
     return results
+
+
+def get_all_categories_by_fields(
+    db: Session,
+    name_filter: list[str] | None = None,
+    description_filter: list[str] | None = None,
+) -> list[Category]:
+    master_conditions = []
+
+    if name_filter:
+        condition_by_name = [Category.name.ilike(f"%{value}%") for value in name_filter]
+        master_conditions.append(or_(*condition_by_name))
+
+    if description_filter:
+        condition_by_description = [
+            Category.description.ilike(f"%{value}%") for value in description_filter
+        ]
+        master_conditions.append(or_(*condition_by_description))
+
+    return db.query(Category).filter(*master_conditions).all()  # Протестировать !!!
 
 
 def update_category(db: Session, category: UpdateCategoryRequest) -> Category:

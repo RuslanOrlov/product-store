@@ -22,7 +22,7 @@ from app.database import Base, engine
 
 app = FastAPI()
 
-app.include_router(category_router, prefix="/api/v1", tags=["Category"])
+app.include_router(category_router, prefix="/api/v1", tags=["Categories"])
 
 
 @app.get("/health")

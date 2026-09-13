@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.dependency import get_db
@@ -18,6 +18,15 @@ def get_all_categories(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> list[GetCategory]:
     return category_service.get_all_categories(db, text)
+
+
+@router.get("/all-by-fields")
+def get_all_categories_by_fields(
+    name_filter: list[str] | None = Query(None),  # noqa: B008
+    description_filter: list[str] | None = Query(None),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> list[GetCategory]:
+    return category_service.get_all_categories_by_fields(db, name_filter, description_filter)
 
 
 @router.post("/create")

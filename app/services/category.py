@@ -16,6 +16,17 @@ def get_all_categories(db: Session, text: str | None = None) -> list[GetCategory
     return category_repository.get_all_categories(db, text)
 
 
+def get_all_categories_by_fields(
+    db: Session,
+    name_filter: list[str] | None = None,
+    description_filter: list[str] | None = None,
+) -> list[GetCategory]:
+    # Вернуть все категории в соответствии с фильтром
+    return category_repository.get_all_categories_by_fields(
+        db, name_filter, description_filter
+    )
+
+
 def create_category(db: Session, dto: CreateOrUpdateCategoryRequest) -> GetCategory:
     # Проверить, есть ли категория с таким наименованием
     if category_repository.is_category_exists(db=db, name=dto.name):
