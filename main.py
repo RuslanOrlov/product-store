@@ -17,12 +17,14 @@
 
 from fastapi import FastAPI
 
-from app.api.v1.category import router as category_router
+from app.api.v1.api_category import router as category_router
+from app.api.v1.api_product import router as product_router
 from app.database import Base, engine
 
 app = FastAPI()
 
-app.include_router(category_router, prefix="/api/v1", tags=["Categories"])
+app.include_router(category_router, prefix="/api/v1/categories", tags=["Categories"])
+app.include_router(product_router, prefix="/api/v1/products", tags=["Products"])
 
 
 @app.get("/health")

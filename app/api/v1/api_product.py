@@ -1,0 +1,66 @@
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+
+from app.dependency import get_db
+from app.schemas.product import (
+    CreateOrUpdateProductRequest,
+    GetProduct,
+    UpdateProductRequest,
+)
+from app.services import service_for_product as product_service
+
+router = APIRouter()
+
+
+@router.get("/all")
+def get_all_products(
+    text: str | None = None,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> list[GetProduct]:
+    return product_service.get_all_products(db, text)
+
+
+@router.get("/all-by-fields")
+def get_all_products_by_fields(
+    name_filter: list[str] | None = Query(None),  # noqa: B008
+    description_filter: list[str] | None = Query(None),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> list[GetProduct]:
+    return product_service.get_all_products_by_fields(
+        db, name_filter, description_filter
+    )
+
+
+@router.post("/create")
+def create_product(
+    product: CreateOrUpdateProductRequest,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> GetProduct:
+    return product_service.create_product(db, product)
+
+
+@router.put("/update")
+def update_product(
+    product: UpdateProductRequest,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> GetProduct:
+    return product_service.update_product(db, product)
+
+
+@router.put("/{id}/update")
+def update_product_by_id(
+    id: int,
+    product: CreateOrUpdateProductRequest,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> GetProduct:
+    return product_service.update_product_by_id(db, id, product)
+
+
+@router.get("/{id}/delete")
+def delete_product(id: int, db: Session = Depends(get_db)) -> dict[str, str]:  # noqa: B008
+    return product_service.delete_product(db, id)
+
+
+@router.get("/{id}")
+def get_product_by_id(id: int, db: Session = Depends(get_db)) -> GetProduct:  # noqa: B008
+    return product_service.get_product_by_id(db, id)

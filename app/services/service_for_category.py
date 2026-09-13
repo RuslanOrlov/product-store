@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.repositories import category as category_repository
+from app.repositories import repository_for_category as category_repository
 from app.schemas.category import (
     CreateOrUpdateCategoryRequest,
     GetCategory,
@@ -35,7 +35,7 @@ def create_category(db: Session, dto: CreateOrUpdateCategoryRequest) -> GetCateg
             status_code=409, detail=f"Category '{dto.name}' already exists."
         )
 
-    # Иначае создать категорию
+    # Иначе создать категорию
     category = category_repository.create_category(db, dto)
     db.commit()
 
@@ -59,7 +59,7 @@ def update_category(db: Session, category: UpdateCategoryRequest) -> GetCategory
             detail=f"Category with given name '{category.name}' already exists.",
         )
 
-    # Иначае обновить категорию
+    # Иначе обновить категорию
     updated = category_repository.update_category(db, category)
     db.commit()
 
@@ -85,7 +85,7 @@ def update_category_by_id(
             detail=f"Category with given name '{category.name}' already exists.",
         )
 
-    # Иначае обновить категорию
+    # Иначе обновить категорию
     updated = category_repository.update_category_by_id(db, id, category)
     db.commit()
 

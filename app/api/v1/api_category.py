@@ -7,7 +7,7 @@ from app.schemas.category import (
     GetCategory,
     UpdateCategoryRequest,
 )
-from app.services import category as category_service
+from app.services import service_for_category as category_service
 
 router = APIRouter()
 
