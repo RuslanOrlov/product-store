@@ -1,14 +1,16 @@
+from decimal import Decimal
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.repositories import repository_for_category as category_repository
+from app.repositories import repo_for_category as category_repository
 
 # from app.schemas.category import (
 #     CreateOrUpdateCategoryRequest,
 #     GetCategory,
 #     UpdateCategoryRequest,
 # )
-from app.repositories import repository_for_product as product_repository
+from app.repositories import repo_for_product as product_repository
 from app.schemas.product import (
     CreateOrUpdateProductRequest,
     GetProduct,
@@ -153,10 +155,70 @@ def delete_product(db: Session, id: int) -> dict[str, str]:
 def get_product_by_id(db: Session, id: int) -> GetProduct:
     # Проверить, отсутствует ли продукт (товар) с таким id
     if not product_repository.is_product_exists(db=db, id=id):
-        # Если продукта нет, выбрасываем исключение
+        # Если продукта (товара) нет, выбрасываем исключение
         raise HTTPException(
-            status_code=404, detail=f"Product with given id'{id}' does not exist."
+            status_code=404,
+            detail=f"Product with given id'{id}' does not exist.",
         )
 
     # Иначе вернуть продукт (товар)
     return product_repository.get_product_by_id(db, id)
+
+
+def change_price(db: Session, id: int, price: Decimal) -> GetProduct:
+    # Проверить, есть ли продукт (товар) с таким id
+    if not product_repository.is_product_exists(db=db, id=id):
+        # Если продукта (товара) нет, выбрасываем исключение
+        raise HTTPException(
+            status_code=404,
+            detail=f"Product with given id '{id}' does not exist.",
+        )
+
+    # Иначе сохранить изменения цены в БД
+    updated = product_repository.change_price(db=db, id=id, price=price)
+    db.commit()
+
+    # Вернуть измененный продукт (товар)
+    return updated
+
+
+def add_quantity(db: Session, id: int, quantity: int) -> GetProduct:
+    # Проверить, есть ли продукт (товар) с указанным id
+    if not product_repository.is_product_exists(db=db, id=id):
+        # Если продукта (товара) нет, выбрасываем исключение
+        raise HTTPException(
+            status_code=404, detail=f"Product with given id '{id}' does not exist."
+        )
+
+    # Иначе добавить количество продукта (товара)
+    updated = product_repository.add_quantity(db=db, id=id, quantity=quantity)
+    db.commit()
+
+    # Вернуть измененный продукт (товар)
+    return updated
+
+
+def subtract_quantity(db: Session, id: int, quantity: int) -> GetProduct:
+    # Проверить, есть ли продукт (товар) с указанным id
+    if not product_repository.is_product_exists(db=db, id=id):
+        # Если продукта (товара) нет, выбрасываем исключение
+        raise HTTPException(
+            status_code=404,
+            detail=f"Product with given id '{id}' does not exist.",
+        )
+
+    # Проверить, достаточно ли количество продукта (товара), чтобы уменьшить его
+    current = product_repository.get_product_by_id(db=db, id=id).quantity
+    if current < quantity:
+        # Если количество продукта (товара) недостаточное, выбрасываем исключение
+        raise HTTPException(
+            status_code=409,
+            detail=f"Quantity of current product '{current}' is insufficient to subtract '{quantity}' from it.",
+        )
+
+    # Иначе уменьшить количество продукта (товара)
+    updated = product_repository.subtract_quantity(db=db, id=id, quantity=quantity)
+    db.commit()
+
+    # Вернуть измененный продукт (товар)
+    return updated

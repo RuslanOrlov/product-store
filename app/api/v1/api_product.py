@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -64,3 +66,29 @@ def delete_product(id: int, db: Session = Depends(get_db)) -> dict[str, str]:  #
 @router.get("/{id}")
 def get_product_by_id(id: int, db: Session = Depends(get_db)) -> GetProduct:  # noqa: B008
     return product_service.get_product_by_id(db, id)
+
+
+@router.get("/{id}/change-price")
+def change_price(
+    id: int,
+    price: Decimal = Query(..., gt=0),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> GetProduct:
+    return product_service.change_price(db=db, id=id, price=price)
+
+
+@router.get("/{id}/add-quantity")
+def add_quantity(
+    id: int,
+    quantity: int = Query(..., gt=0),
+    db: Session = Depends(get_db),  # noqa: B008
+) -> GetProduct:
+    return product_service.add_quantity(db=db, id=id, quantity=quantity)
+
+@router.get("/{id}/subtract-quantity")
+def subtract_quantity(
+    id: int,
+    quantity: int = Query(..., gt=0),
+    db: Session = Depends(get_db),  # noqa: B008
+) -> GetProduct:
+    return product_service.subtract_quantity(db=db, id=id, quantity=quantity)

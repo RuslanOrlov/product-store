@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.repositories import repository_for_category as category_repository
+from app.repositories import repo_for_category as category_repository
 from app.schemas.category import (
     CreateOrUpdateCategoryRequest,
     GetCategory,

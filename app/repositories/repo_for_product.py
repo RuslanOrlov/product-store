@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy import String, cast, or_
 from sqlalchemy.orm import Session
 
@@ -132,4 +134,22 @@ def update_product_by_id(
 def delete_product(db: Session, id: int) -> Product:
     product = get_product_by_id(db, id)
     db.delete(product)
+    return product
+
+
+def change_price(db: Session, id: int, price: Decimal) -> Product:
+    product = db.query(Product).filter(Product.id == id).first()
+    product.price = price
+    return product
+
+
+def add_quantity(db: Session, id: int, quantity: int) -> Product:
+    product = db.query(Product).filter(Product.id == id).first()
+    product.quantity += quantity
+    return product
+
+
+def subtract_quantity(db: Session, id: int, quantity: int) -> Product:
+    product = db.query(Product).filter(Product.id == id).first()
+    product.quantity -= quantity
     return product
