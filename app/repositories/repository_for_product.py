@@ -16,16 +16,30 @@ from app.schemas.product import (
 def is_product_exists(
     db: Session, name: str | None = None, id: int | None = None
 ) -> bool:
+    # Проверяем существует ли продукт (товар) с заданным именем И с заданным id
+    if name is not None and id is not None:
+        return (
+            db.query(Product).filter(Product.name == name, Product.id == id).first()
+            is not None
+        )
     # Проверяем существует ли продукт (товар) с заданным именем
-    if name is not None:
+    elif name is not None:
         return get_product_by_name(db, name) is not None
-    # Проверяем существует ли продукт (товар) с заданным идентификатором
+    # Проверяем существует ли продукт (товар) с заданным id
     elif id is not None:
         return get_product_by_id(db, id) is not None
     # Проверяем существует ли хотя бы один продукт (товар) (любое название и любой идентификатор)
     else:
         return db.query(Product.id).first() is not None
         # raise ValueError("It is necessary to provide either a name or a product ID")
+
+
+def is_product_exists_except_id(db: Session, id: int, name: str) -> bool:
+    # Проверяем существует ли продукт (товар) с заданным именем И с другим id
+    return (
+        db.query(Product).filter(Product.id != id, Product.name == name).first()
+        is not None
+    )
 
 
 def create_product(db: Session, dto: CreateOrUpdateProductRequest) -> Product:

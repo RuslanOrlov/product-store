@@ -17,7 +17,8 @@ from app.schemas.product import (
 
 
 def get_all_products(db: Session, text: str | None = None) -> list[GetProduct]:
-    # Вернуть все продукты (товары)
+    # Вернуть все продукты (товары), ЕСЛИ фильтр text НЕ ЗАДАН. Иначе вернуть
+    # только продукты (товары), которые соответствуют фильтру text, ЕСЛИ он ЗАДАН
     return product_repository.get_all_products(db, text)
 
 
@@ -26,7 +27,8 @@ def get_all_products_by_fields(
     name_filter: list[str] | None = None,
     description_filter: list[str] | None = None,
 ) -> list[GetProduct]:
-    # Вернуть все продукты (товары) в соответствии с фильтром
+    # Вернуть все продукты (товары) в соответствии с фильтром по полям, ЕСЛИ они ЗАДАНЫ
+    # В противном случае вернуть все продукты (товары), ЕСЛИ значения фильтра НЕ ЗАДАНЫ
     return product_repository.get_all_products_by_fields(
         db, name_filter, description_filter
     )
@@ -72,13 +74,15 @@ def update_product(db: Session, product: UpdateProductRequest) -> GetProduct:
             status_code=404,
             detail=f"Product with expected id '{product.id}' does not exist.",
         )
-    # Проверить, есть ли продукт (товар) с таким названием
-    # if product_repository.is_product_exists(db=db, name=product.name):
-    #     # Если продукт (товар) с таким названием уже есть, выбрасываем исключение
-    #     raise HTTPException(
-    #         status_code=409,
-    #         detail=f"Product with given name '{product.name}' already exists.",
-    #     )
+    # Проверить, есть ли продукт (товар) с таким же названием, но с другим id
+    if product_repository.is_product_exists_except_id(
+        db=db, id=product.id, name=product.name
+    ):
+        # Если продукт (товар) с таким названием уже принадлежит другому id, выбрасываем исключение
+        raise HTTPException(
+            status_code=409,
+            detail=f"Product with given name '{product.name}' already exists with different id.",
+        )
 
     # Проверить, есть ли категория с необходимым id в БД
     if not category_repository.is_category_exists(db=db, id=product.category_id):
@@ -106,13 +110,13 @@ def update_product_by_id(
             status_code=404,
             detail=f"Product with given id '{id}' does not exist.",
         )
-    # Проверить, есть ли продукт (товар) с таким названием
-    # if product_repository.is_product_exists(db=db, name=product.name):
-    #     # Если продукт (товар) с таким названием уже есть, выбрасываем исключение
-    #     raise HTTPException(
-    #         status_code=409,
-    #         detail=f"Product with given name '{product.name}' already exists.",
-    #     )
+    # Проверить, есть ли продукт (товар) с таким же названием, но с другим id
+    if product_repository.is_product_exists_except_id(db=db, id=id, name=product.name):
+        # Если продукт (товар) с таким названием уже принадлежит другому id, выбрасываем исключение
+        raise HTTPException(
+            status_code=409,
+            detail=f"Product with given name '{product.name}' already exists with different id.",
+        )
 
     # Проверить, есть ли категория с необходимым id в БД
     if not category_repository.is_category_exists(db=db, id=product.category_id):
