@@ -3,11 +3,6 @@ from decimal import Decimal
 from sqlalchemy import String, cast, or_
 from sqlalchemy.orm import Session
 
-# from app.models.category import Category
-# from app.schemas.category import (
-#     CreateOrUpdateCategoryRequest,
-#     UpdateCategoryRequest,
-# )
 from app.models.product import Product
 from app.schemas.product import (
     CreateOrUpdateProductRequest,

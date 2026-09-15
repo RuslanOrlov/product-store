@@ -48,15 +48,17 @@ def update_category(db: Session, category: UpdateCategoryRequest) -> GetCategory
     if not category_repository.is_category_exists(db=db, id=category.id):
         # Если категория отсутствует, выбрасываем исключение
         raise HTTPException(
-            status_code=409,
+            status_code=404,
             detail=f"Category with expected id '{category.id}' does not exist.",
         )
-    # Проверить, есть ли категория с таким названием
-    if category_repository.is_category_exists(db=db, name=category.name):
-        # Если категория с таким названием уже есть, выбрасываем исключение
+    # Проверить, есть ли категория с заданным названием, но с другим id
+    if category_repository.is_category_exists_except_id(
+        db=db, id=category.id, name=category.name
+    ):
+        # Если категория с таким названием уже принадлежит другому id, выбрасываем исключение
         raise HTTPException(
             status_code=409,
-            detail=f"Category with given name '{category.name}' already exists.",
+            detail=f"Category with given name '{category.name}' already exists with different id.",
         )
 
     # Иначе обновить категорию
@@ -74,15 +76,17 @@ def update_category_by_id(
     if not category_repository.is_category_exists(db=db, id=id):
         # Если категория отсутствует, выбрасываем исключение
         raise HTTPException(
-            status_code=409,
+            status_code=404,
             detail=f"Category with given id '{id}' does not exist.",
         )
-    # Проверить, есть ли категория с таким названием
-    if category_repository.is_category_exists(db=db, name=category.name):
-        # Если категория с таким названием уже есть, выбрасываем исключение
+    # Проверить, есть ли категория с заданным названием, но с другим id
+    if category_repository.is_category_exists_except_id(
+        db=db, id=id, name=category.name
+    ):
+        # Если категория с таким названием уже принадлежит другому id, выбрасываем исключение
         raise HTTPException(
             status_code=409,
-            detail=f"Category with given name '{category.name}' already exists.",
+            detail=f"Category with given name '{category.name}' already exists with different id.",
         )
 
     # Иначе обновить категорию

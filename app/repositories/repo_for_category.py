@@ -11,16 +11,30 @@ from app.schemas.category import (
 def is_category_exists(
     db: Session, name: str | None = None, id: int | None = None
 ) -> bool:
+    # Проверяем существует ли категория с заданным именем И с заданным id
+    if name is not None and id is not None:
+        return (
+            db.query(Category).filter(Category.id == id, Category.name == name).first()
+            is not None
+        )
     # Проверяем существует ли категория с заданным именем
     if name is not None:
         return get_category_by_name(db, name) is not None
-    # Проверяем существует ли категория с заданным идентификатором
+    # Проверяем существует ли категория с заданным id
     elif id is not None:
         return get_category_by_id(db, id) is not None
     # Проверяем существует ли хотя бы одна категория (любое название и любой идентификатор)
     else:
         return db.query(Category.id).first() is not None
         # raise ValueError("It is necessary to provide either a name or a category ID")
+
+
+def is_category_exists_except_id(db: Session, id: int, name: str) -> bool:
+    # Проверяем существует ли категория с заданным именем И с другим id
+    return (
+        db.query(Category).filter(Category.id != id, Category.name == name).first()
+        is not None
+    )
 
 
 def create_category(db: Session, dto: CreateOrUpdateCategoryRequest) -> Category:
