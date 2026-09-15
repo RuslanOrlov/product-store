@@ -4,16 +4,11 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.repositories import repo_for_category as category_repository
-
-# from app.schemas.category import (
-#     CreateOrUpdateCategoryRequest,
-#     GetCategory,
-#     UpdateCategoryRequest,
-# )
 from app.repositories import repo_for_product as product_repository
 from app.schemas.product import (
     CreateOrUpdateProductRequest,
     GetProduct,
+    PriceFilter,
     UpdateProductRequest,
 )
 
@@ -28,11 +23,15 @@ def get_all_products_by_fields(
     db: Session,
     name_filter: list[str] | None = None,
     description_filter: list[str] | None = None,
+    price_filter: PriceFilter | None = None,
 ) -> list[GetProduct]:
     # Вернуть все продукты (товары) в соответствии с фильтром по полям, ЕСЛИ они ЗАДАНЫ
     # В противном случае вернуть все продукты (товары), ЕСЛИ значения фильтра НЕ ЗАДАНЫ
     return product_repository.get_all_products_by_fields(
-        db, name_filter, description_filter
+        db,
+        name_filter,
+        description_filter,
+        price_filter,
     )
 
 

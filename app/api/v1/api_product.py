@@ -1,12 +1,13 @@
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.dependency import get_db
 from app.schemas.product import (
     CreateOrUpdateProductRequest,
     GetProduct,
+    PriceFilter,
     UpdateProductRequest,
 )
 from app.services import service_for_product as product_service
@@ -22,14 +23,18 @@ def get_all_products(
     return product_service.get_all_products(db, text)
 
 
-@router.get("/all-by-fields")
+@router.post("/all-by-fields")
 def get_all_products_by_fields(
-    name_filter: list[str] | None = Query(None),  # noqa: B008
-    description_filter: list[str] | None = Query(None),  # noqa: B008
+    name_filter: list[str] | None = Body(None),  # noqa: B008
+    description_filter: list[str] | None = Body(None),  # noqa: B008
+    price_filter: PriceFilter | None = Body(None),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> list[GetProduct]:
     return product_service.get_all_products_by_fields(
-        db, name_filter, description_filter
+        db,
+        name_filter,
+        description_filter,
+        price_filter,
     )
 
 
@@ -84,6 +89,7 @@ def add_quantity(
     db: Session = Depends(get_db),  # noqa: B008
 ) -> GetProduct:
     return product_service.add_quantity(db=db, id=id, quantity=quantity)
+
 
 @router.get("/{id}/subtract-quantity")
 def subtract_quantity(

@@ -1,11 +1,12 @@
 from decimal import Decimal
 
-from sqlalchemy import String, cast, or_
+from sqlalchemy import String, and_, cast, or_
 from sqlalchemy.orm import Session
 
 from app.models.product import Product
 from app.schemas.product import (
     CreateOrUpdateProductRequest,
+    PriceFilter,
     UpdateProductRequest,
 )
 
@@ -84,6 +85,7 @@ def get_all_products_by_fields(
     db: Session,
     name_filter: list[str] | None = None,
     description_filter: list[str] | None = None,
+    price_filter: PriceFilter | None = None,
 ) -> list[Product]:
     master_conditions = []
 
@@ -97,7 +99,14 @@ def get_all_products_by_fields(
         ]
         master_conditions.append(or_(*condition_by_description))
 
-    return db.query(Product).filter(*master_conditions).all()  # Протестировать !!!
+    if price_filter and price_filter.ranges:
+        condition_by_price = [
+            and_(Product.price >= start, Product.price <= end)
+            for start, end in price_filter.ranges
+        ]
+        master_conditions.append(or_(*condition_by_price))
+
+    return db.query(Product).filter(*master_conditions).all()
 
 
 def update_product(db: Session, product: UpdateProductRequest) -> Product:
