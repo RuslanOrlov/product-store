@@ -16,7 +16,6 @@ class CreateOrUpdateProductRequest(BaseModel):
 
     # Валидатор для проверки корректности поля name
     @field_validator("name")
-    # @classmethod
     def name_must_be_not_empty(cls, v: str) -> str:
         # Убираем пробелы по краям
         v = v.strip()
@@ -40,7 +39,6 @@ class GetProduct(BaseModel):
 
     # Валидатор для проверки корректности поля name
     @field_validator("name")
-    # @classmethod
     def name_must_be_not_empty(cls, v: str) -> str:
         # Убираем пробелы по краям
         v = v.strip()
@@ -62,7 +60,6 @@ class UpdateProductRequest(BaseModel):
 
     # Валидатор для проверки корректности поля name
     @field_validator("name")
-    # @classmethod
     def name_must_be_not_empty(cls, v: str) -> str:
         # Убираем пробелы по краям
         v = v.strip()
@@ -88,8 +85,8 @@ class PriceFilter(BaseModel):
         ],
     )
 
+    # Валидатор для проверки корректности диапазонов значений price
     @field_validator("ranges")
-    # @classmethod
     def validate_couples_of_price(
         cls, value: list[tuple[Decimal, Decimal]]
     ) -> list[tuple[Decimal, Decimal]]:
@@ -116,8 +113,8 @@ class QuantityFilter(BaseModel):
         ],
     )
 
+    # Валидатор для проверки корректности диапазонов значений quantity
     @field_validator("ranges")
-    # @classmethod
     def validate_couples_of_quantity(
         cls, value: list[tuple[int, int]]
     ) -> list[tuple[int, int]]:
@@ -147,8 +144,8 @@ class CreatedAtFilter(BaseModel):
         ],
     )
 
+    # Валидатор для проверки корректности диапазонов значений created_at
     @field_validator("ranges")
-    # @classmethod
     def validate_couples_of_created_at(
         cls, value: list[tuple[datetime, datetime]]
     ) -> list[tuple[datetime, datetime]]:
@@ -158,5 +155,32 @@ class CreatedAtFilter(BaseModel):
             if start > end:
                 raise ValueError(
                     f"In couple #{i} start date '{start}' more than end date '{end}'"
+                )
+        return value
+
+
+# Модель для передачи параметра фильтрации по полю category_id
+class ByCategoryFilter(BaseModel):
+    ids: list[int] = Field(
+        default_factory=list,
+        title="Список id категорий продуктов (товаров)",
+        description=(
+            "Список id категорий продуктов (товаров). "
+            "Список задаётся как [id_1, id_2, ..., id_n]."
+        ),
+        examples=[[1, 2, 4, 8, 11]],
+    )
+
+    # Валидатор для проверки корректности значений id категорий продуктов
+    @field_validator("ids")
+    def validate_filter_field(cls, value: list[int]) -> list[int]:
+        if None in value:
+            raise ValueError(
+                "List contains None values, which are not allowed for filtering."
+            )
+        for i, v in enumerate(value, start=1):
+            if v <= 0:
+                raise ValueError(
+                    f"Value #{i} is zero or negative: '{v}'. All values must be positive."
                 )
         return value

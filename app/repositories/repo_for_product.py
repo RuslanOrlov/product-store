@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.product import Product
 from app.schemas.product import (
+    ByCategoryFilter,
     CreatedAtFilter,
     CreateOrUpdateProductRequest,
     PriceFilter,
@@ -90,6 +91,7 @@ def get_all_products_by_fields(
     price_filter: PriceFilter | None = None,
     quantity_filter: QuantityFilter | None = None,
     created_at_filter: CreatedAtFilter | None = None,
+    category_filter: ByCategoryFilter | None = None,
 ) -> list[Product]:
     master_conditions = []
 
@@ -123,6 +125,9 @@ def get_all_products_by_fields(
             for start, end in created_at_filter.ranges
         ]
         master_conditions.append(or_(*condition_by_created_at))
+
+    if category_filter and category_filter.ids:
+        master_conditions.append(Product.category_id.in_(category_filter.ids))
 
     return db.query(Product).filter(*master_conditions).all()
 

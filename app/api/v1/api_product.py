@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.dependency import get_db
 from app.schemas.product import (
+    ByCategoryFilter,
     CreatedAtFilter,
     CreateOrUpdateProductRequest,
     GetProduct,
@@ -32,6 +33,7 @@ def get_all_products_by_fields(
     price_filter: PriceFilter | None = Body(None),  # noqa: B008
     quantity_filter: QuantityFilter | None = Body(None),  # noqa: B008
     created_at_filter: CreatedAtFilter | None = Body(None),  # noqa: B008
+    category_filter: ByCategoryFilter | None = Body(None),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> list[GetProduct]:
     return product_service.get_all_products_by_fields(
@@ -41,6 +43,7 @@ def get_all_products_by_fields(
         price_filter,
         quantity_filter,
         created_at_filter,
+        category_filter,
     )
 
 
