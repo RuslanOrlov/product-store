@@ -73,7 +73,7 @@ class UpdateProductRequest(BaseModel):
         return v
 
 
-# Модель для передачи параметра фильтрации price
+# Модель для передачи параметра фильтрации по полю price
 class PriceFilter(BaseModel):
     ranges: list[tuple[Decimal, Decimal]] = Field(
         default_factory=list,
@@ -101,7 +101,7 @@ class PriceFilter(BaseModel):
         return value
 
 
-# Модель для передачи параметра фильтрации quantity
+# Модель для передачи параметра фильтрации по полю quantity
 class QuantityFilter(BaseModel):
     ranges: list[tuple[int, int]] = Field(
         default_factory=list,
@@ -125,5 +125,38 @@ class QuantityFilter(BaseModel):
             if start > end:
                 raise ValueError(
                     f"In couple #{i} start quantity '{start}' more than end quantity '{end}'"
+                )
+        return value
+
+
+# Модель для передачи параметра фильтрации по полю created_at
+class CreatedAtFilter(BaseModel):
+    ranges: list[tuple[datetime, datetime]] = Field(
+        default_factory=list,
+        title="Диапазоны дат создания товара",
+        description=(
+            "Список диапазонов дат создания товара. "
+            "Каждый диапазон задаётся как "
+            "[начальная дата, конечная дата]."
+        ),
+        examples=[
+            [
+                ["2026-09-01T00:00:00", "2026-09-15T23:59:59"],
+                ["2026-08-01T00:00:00", "2026-08-31T23:59:59"],
+            ],
+        ],
+    )
+
+    @field_validator("ranges")
+    # @classmethod
+    def validate_couples_of_created_at(
+        cls, value: list[tuple[datetime, datetime]]
+    ) -> list[tuple[datetime, datetime]]:
+        for i, (start, end) in enumerate(value, start=1):
+            if start is None or end is None:
+                raise ValueError(f"In couple #{i} dates cannot be null")
+            if start > end:
+                raise ValueError(
+                    f"In couple #{i} start date '{start}' more than end date '{end}'"
                 )
         return value

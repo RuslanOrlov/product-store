@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.repositories import repo_for_category as category_repository
 from app.repositories import repo_for_product as product_repository
 from app.schemas.product import (
+    CreatedAtFilter,
     CreateOrUpdateProductRequest,
     GetProduct,
     PriceFilter,
@@ -26,6 +27,7 @@ def get_all_products_by_fields(
     description_filter: list[str] | None = None,
     price_filter: PriceFilter | None = None,
     quantity_filter: QuantityFilter | None = None,
+    created_at_filter: CreatedAtFilter | None = None,
 ) -> list[GetProduct]:
     # Вернуть все продукты (товары) в соответствии с фильтром по полям, ЕСЛИ они ЗАДАНЫ
     # В противном случае вернуть все продукты (товары), ЕСЛИ значения фильтра НЕ ЗАДАНЫ
@@ -35,6 +37,7 @@ def get_all_products_by_fields(
         description_filter,
         price_filter,
         quantity_filter,
+        created_at_filter,
     )
 
 
