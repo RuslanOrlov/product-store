@@ -73,9 +73,12 @@ def get_all_products(db: Session, text: str | None = None) -> list[Product]:
         db.query(Product)
         .filter(
             or_(
+                cast(Product.id, String).like(search_value),
                 Product.name.ilike(search_value),
                 Product.description.ilike(search_value),
-                cast(Product.id, String).like(search_value),
+                cast(Product.price, String).like(search_value),
+                cast(Product.quantity, String).like(search_value),
+                # cast(Product.category_id, String).like(search_value),
                 cast(Product.created_at, String).like(search_value),
             )
         )
