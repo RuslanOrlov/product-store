@@ -7,6 +7,7 @@ from app.models.product import Product
 from app.schemas.product import (
     CreateOrUpdateProductRequest,
     PriceFilter,
+    QuantityFilter,
     UpdateProductRequest,
 )
 
@@ -86,6 +87,7 @@ def get_all_products_by_fields(
     name_filter: list[str] | None = None,
     description_filter: list[str] | None = None,
     price_filter: PriceFilter | None = None,
+    quantity_filter: QuantityFilter | None = None,
 ) -> list[Product]:
     master_conditions = []
 
@@ -105,6 +107,13 @@ def get_all_products_by_fields(
             for start, end in price_filter.ranges
         ]
         master_conditions.append(or_(*condition_by_price))
+
+    if quantity_filter and quantity_filter.ranges:
+        condition_by_quantity = [
+            and_(Product.quantity >= start, Product.quantity <= end)
+            for start, end in quantity_filter.ranges
+        ]
+        master_conditions.append(or_(*condition_by_quantity))
 
     return db.query(Product).filter(*master_conditions).all()
 

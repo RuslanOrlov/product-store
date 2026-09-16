@@ -9,6 +9,7 @@ from app.schemas.product import (
     CreateOrUpdateProductRequest,
     GetProduct,
     PriceFilter,
+    QuantityFilter,
     UpdateProductRequest,
 )
 
@@ -24,6 +25,7 @@ def get_all_products_by_fields(
     name_filter: list[str] | None = None,
     description_filter: list[str] | None = None,
     price_filter: PriceFilter | None = None,
+    quantity_filter: QuantityFilter | None = None,
 ) -> list[GetProduct]:
     # Вернуть все продукты (товары) в соответствии с фильтром по полям, ЕСЛИ они ЗАДАНЫ
     # В противном случае вернуть все продукты (товары), ЕСЛИ значения фильтра НЕ ЗАДАНЫ
@@ -32,6 +34,7 @@ def get_all_products_by_fields(
         name_filter,
         description_filter,
         price_filter,
+        quantity_filter,
     )
 
 

@@ -8,6 +8,7 @@ from app.schemas.product import (
     CreateOrUpdateProductRequest,
     GetProduct,
     PriceFilter,
+    QuantityFilter,
     UpdateProductRequest,
 )
 from app.services import service_for_product as product_service
@@ -28,6 +29,7 @@ def get_all_products_by_fields(
     name_filter: list[str] | None = Body(None),  # noqa: B008
     description_filter: list[str] | None = Body(None),  # noqa: B008
     price_filter: PriceFilter | None = Body(None),  # noqa: B008
+    quantity_filter: QuantityFilter | None = Body(None),  # noqa: B008
     db: Session = Depends(get_db),  # noqa: B008
 ) -> list[GetProduct]:
     return product_service.get_all_products_by_fields(
@@ -35,6 +37,7 @@ def get_all_products_by_fields(
         name_filter,
         description_filter,
         price_filter,
+        quantity_filter,
     )
 
 

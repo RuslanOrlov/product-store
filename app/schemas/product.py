@@ -34,6 +34,7 @@ class GetProduct(BaseModel):
     description: str | None = Field(None, max_length=255)
     price: Decimal = Field(..., gt=0)
     quantity: int = Field(..., ge=0)
+    # category_id: int
     category: GetCategory
     created_at: datetime
 
@@ -96,5 +97,33 @@ class PriceFilter(BaseModel):
             if start > end:
                 raise ValueError(
                     f"In couple #{i} start price '{start}' more than end price '{end}'"
+                )
+        return value
+
+
+# Модель для передачи параметра фильтрации quantity
+class QuantityFilter(BaseModel):
+    ranges: list[tuple[int, int]] = Field(
+        default_factory=list,
+        title="Диапазоны количества товара",
+        description=(
+            "Список диапазонов количества товара. "
+            "Каждый диапазон задаётся как "
+            "[минимальное количество, максимальное количество]."
+        ),
+        examples=[
+            [[1, 50], [80, 180]],
+        ],
+    )
+
+    @field_validator("ranges")
+    # @classmethod
+    def validate_couples_of_quantity(
+        cls, value: list[tuple[int, int]]
+    ) -> list[tuple[int, int]]:
+        for i, (start, end) in enumerate(value, start=1):
+            if start > end:
+                raise ValueError(
+                    f"In couple #{i} start quantity '{start}' more than end quantity '{end}'"
                 )
         return value
