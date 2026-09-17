@@ -3,6 +3,7 @@ from decimal import Decimal
 from sqlalchemy import String, and_, cast, or_
 from sqlalchemy.orm import Session
 
+from app.models.category import Category
 from app.models.product import Product
 from app.schemas.product import (
     ByCategoryFilter,
@@ -62,29 +63,40 @@ def get_product_by_name(db: Session, name: str) -> Product:
     return db.query(Product).filter(Product.name == name).first()
 
 
-def get_all_products(db: Session, text: str | None = None) -> list[Product]:
-    # Получаем все продукты (товары), если условие НЕ задано
-    if text is None or len(text) == 0:
-        return db.query(Product).all()
+def get_all_products(
+    db: Session, text: str | None = None, category_name: str | None = None
+) -> list[Product]:
+    # Формируем общую часть SQL запроса
+    stmt = db.query(Product)
 
-    # Получаем продукты (товары) по условию, если оно задано
-    search_value = f"%{text}%"
-    results = (
-        db.query(Product)
-        .filter(
+    # Присоединяем условие выборки продуктов (товаров) по
+    # вхождению поискового значения text в любое поле Product
+    if text and text.strip():
+        search_value = f"%{text}%"
+        stmt = stmt.filter(
             or_(
                 cast(Product.id, String).like(search_value),
                 Product.name.ilike(search_value),
                 Product.description.ilike(search_value),
                 cast(Product.price, String).like(search_value),
                 cast(Product.quantity, String).like(search_value),
-                # cast(Product.category_id, String).like(search_value),
                 cast(Product.created_at, String).like(search_value),
+                # cast(Product.category_id, String).like(search_value),
             )
         )
-        .all()
-    )
-    return results
+
+    # Присоединяем условие выборки продуктов (товаров)
+    # по category_name в связанной сущности Category
+    if category_name and category_name.strip():
+        stmt = stmt.join(Product.category).filter(
+            or_(
+                Category.name.ilike(f"%{category_name}%"),
+                # Category.description.ilike(f"%{category_name}%"),
+            )
+        )
+
+    # Возвращаем результат
+    return stmt.all()
 
 
 def get_all_products_by_fields(

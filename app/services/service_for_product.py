@@ -16,10 +16,12 @@ from app.schemas.product import (
 )
 
 
-def get_all_products(db: Session, text: str | None = None) -> list[GetProduct]:
-    # Вернуть все продукты (товары), ЕСЛИ фильтр text НЕ ЗАДАН. Иначе вернуть
-    # только продукты (товары), которые соответствуют фильтру text, ЕСЛИ он ЗАДАН
-    return product_repository.get_all_products(db, text)
+def get_all_products(
+    db: Session, text: str | None = None, category_name: str | None = None
+) -> list[GetProduct]:
+    # Вернуть все продукты (товары), ЕСЛИ фильтры text и category_name НЕ ЗАДАНЫ.
+    # Иначе вернуть только продукты (товары), соответствующие заданным фильтрам.
+    return product_repository.get_all_products(db, text, category_name)
 
 
 def get_all_products_by_fields(

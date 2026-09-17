@@ -21,9 +21,10 @@ router = APIRouter()
 @router.get("/all")
 def get_all_products(
     text: str | None = None,
+    category_name: str | None = None,
     db: Session = Depends(get_db),  # noqa: B008
 ) -> list[GetProduct]:
-    return product_service.get_all_products(db, text)
+    return product_service.get_all_products(db, text, category_name)
 
 
 @router.post("/all-by-fields")
